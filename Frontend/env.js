@@ -1,2 +1,2 @@
 // env.js
-window.BACKEND_URL = "https://your-backend-service.onrender.com";
+window.BACKEND_URL = "http://127.0.0.1:5000";

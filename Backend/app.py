@@ -1,4 +1,5 @@
 from flask import Flask, request, jsonify
+from flask_cors import CORS  # Install: pip install flask-cors
 from werkzeug.utils import secure_filename
 import os
 from asr_model import transcribe_audio
@@ -6,6 +7,7 @@ from compare import compare_tamil_graphemes
 from utils.base_aud_tools import convert_to_wav
 
 app = Flask(__name__)
+CORS(app)  # Allow all origins (for testing)
 UPLOAD_FOLDER = 'uploads'
 os.makedirs(UPLOAD_FOLDER, exist_ok=True)
 
@@ -28,7 +30,7 @@ def check_pronunciation():
 
     transcription = transcribe_audio(wav_path)  # Tamil
     
-    transcribed_text = transcription['text'].strip()
+    transcribed_text = transcription.strip()
 
     compare_result = compare_tamil_graphemes(expected_word, transcribed_text)
     result = "Correct" if compare_result["is_exact"] else "Incorrect"

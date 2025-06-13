@@ -65,7 +65,7 @@ navigator.mediaDevices.getUserMedia({ audio: true })
   });
 
 // Global constant set via <script> tag or env.js file
-const BACKEND_URL = window.BACKEND_URL || 'http://localhost:5000';  // fallback for local testing
+const BACKEND_URL = window.BACKEND_URL || 'http://127.0.0.1:5000';  // fallback for local testing
 
 function sendToBackend(blob, expectedWord) {
   const formData = new FormData();
