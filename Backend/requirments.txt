@@ -1,0 +1,6 @@
+grapheme
+ffmpeg
+torch
+transformers
+streamlit
+streamlit_webrtc
