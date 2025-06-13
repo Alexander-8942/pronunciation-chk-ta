@@ -1,0 +1,31 @@
+<!DOCTYPE html>
+<html lang="en">
+<head>
+  <meta charset="UTF-8">
+  <title>Pronunciation Practice</title>
+  <link rel="stylesheet" href="style.css">
+  <link rel="stylesheet" href="https://cdnjs.cloudflare.com/ajax/libs/font-awesome/6.4.0/css/all.min.css">
+</head>
+<body>
+  <div class="container">
+    <h1>🎤 Tamil Pronunciation Practice</h1>
+    
+    <div class="word-box">
+      <h2 id="prompt">நீர்வீழ்ச்சி</h2>
+      <p id="progress">Word 1 of 10</p>
+    </div>
+
+    <!--<button id="recordBtn">🎙 Press & Hold to Speak</button>-->
+    <!--<button id="recordBtn"><i class="fas fa-microphone"></i></button>-->
+    <div class="record-container">
+      <button id="recordBtn">🎤</button>
+      <span class="record-label">Press & Hold to Record</span>
+    </div>
+
+    <div id="feedback"></div>
+    <div id="audioPlayback"></div>
+  </div>
+
+  <script src="recorder.js"></script>
+</body>
+</html>

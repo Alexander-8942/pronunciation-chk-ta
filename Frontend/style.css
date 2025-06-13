@@ -1,0 +1,90 @@
+body {
+  font-family: 'Segoe UI', sans-serif;
+  background: #f0f4f8;
+  color: #333;
+  text-align: center;
+  margin: 0;
+  padding: 0;
+}
+
+.container {
+  max-width: 500px;
+  margin: 80px auto;
+  background: white;
+  padding: 30px;
+  border-radius: 16px;
+  box-shadow: 0 8px 20px rgba(0, 0, 0, 0.1);
+}
+
+.word-box {
+  margin-bottom: 30px;
+}
+
+#prompt {
+  font-size: 32px;
+  margin-bottom: 10px;
+  color: #444;
+}
+
+#progress {
+  color: #777;
+  font-size: 16px;
+}
+
+.record-container {
+  display: flex;
+  flex-direction: column;
+  align-items: center;
+  gap: 10px;
+}
+
+#recordBtn {
+  width: 80px;
+  height: 80px;
+  border-radius: 50%;
+  background-color: #e53935;
+  color: white;
+  font-size: 28px;
+  border: none;
+  box-shadow: 0 4px 10px rgba(229, 57, 53, 0.4);
+  transition: all 0.3s ease;
+  cursor: pointer;
+  display: flex;
+  align-items: center;
+  justify-content: center;
+}
+
+#recordBtn:hover {
+  background-color: #c62828;
+  box-shadow: 0 6px 14px rgba(198, 40, 40, 0.5);
+}
+
+#recordBtn:active {
+  transform: scale(0.95);
+  background-color: #b71c1c;
+}
+
+.record-label {
+  font-size: 14px;
+  color: #666;
+  font-weight: 500;
+  user-select: none;
+}
+
+#audioPlayback {
+  margin-top: 20px;
+}
+
+#feedback {
+  margin-top: 15px;
+  font-size: 20px;
+  font-weight: bold;
+}
+
+#feedback.correct {
+  color: green;
+}
+
+#feedback.incorrect {
+  color: red;
+}
