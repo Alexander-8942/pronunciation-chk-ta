@@ -64,11 +64,14 @@ navigator.mediaDevices.getUserMedia({ audio: true })
     console.error(err);
   });
 
+// Global constant set via <script> tag or env.js file
+const BACKEND_URL = window.BACKEND_URL || 'http://localhost:5000';  // fallback for local testing
+
 function sendToBackend(blob, expectedWord) {
   const formData = new FormData();
   formData.append('audio', blob, 'audio.webm');
 
-  fetch(`http://localhost:5000/check?expected=${encodeURIComponent(expectedWord)}`, {
+  fetch(`${BACKEND_URL}/check?expected=${encodeURIComponent(expectedWord)}`, {
     method: 'POST',
     body: formData
   })
