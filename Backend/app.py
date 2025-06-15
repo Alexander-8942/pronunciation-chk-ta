@@ -5,6 +5,7 @@ import os
 from asr_model import transcribe_audio
 from compare import compare_tamil_graphemes
 from utils.base_aud_tools import convert_to_wav
+import datetime
 
 app = Flask(__name__)
 CORS(app)  # Allow all origins (for testing)
@@ -14,30 +15,58 @@ os.makedirs(UPLOAD_FOLDER, exist_ok=True)
 
 @app.route('/check', methods=['POST'])
 def check_pronunciation():
-    if 'audio' not in request.files:
-        return jsonify({'error': 'No audio file'}), 400
+    try:
+        print("🔹 Received request to /check")  # DEBUG
+        print("🔹 Files:", request.files)  # DEBUG
+        print("🔹 Args:", request.args)  # DEBUG
+        print(f"🔹 Received request at: {datetime.datetime.now()}") #DEBUG
 
-    expected_word = request.args.get("expected", "").strip()
-    audio_file = request.files['audio']
-    filename = secure_filename(audio_file.filename)
-    file_path = os.path.join(UPLOAD_FOLDER, filename)
-    audio_file.save(file_path)
+        if 'audio' not in request.files:
+            print("❌ No audio file in request")  # DEBUG
+            return jsonify({'error': 'No audio file'}), 400
 
-    # Convert to WAV (16kHz mono)
-    wav_path = convert_to_wav(file_path)
-    if not wav_path:
-        return jsonify({'error': 'Audio conversion failed'}), 500
+        expected_word = request.args.get("expected", "").strip()
+        print("🟢 Expected word:", expected_word)  # DEBUG
 
-    transcription = transcribe_audio(wav_path)  # Tamil
-    
-    transcribed_text = transcription.strip()
+        audio_file = request.files['audio']
+        filename = secure_filename(audio_file.filename)
+        file_path = os.path.join(UPLOAD_FOLDER, filename)
+        audio_file.save(file_path)
+        print("📁 Saved uploaded file to:", file_path)  # DEBUG
 
-    compare_result = compare_tamil_graphemes(expected_word, transcribed_text)
-    result = "Correct" if compare_result["is_exact"] else "Incorrect"
+        # Convert to WAV (16kHz mono)
+        print("🔄 Converting to WAV...")  # DEBUG
+        wav_path = convert_to_wav(file_path)
+        print("✅ WAV path:", wav_path)  # DEBUG
 
-    return jsonify({
-        "result": result  
-    })
+        if not wav_path:
+            print("❌ Audio conversion failed")  # DEBUG
+            return jsonify({'error': 'Audio conversion failed'}), 500
+
+        start = datetime.time.time()
+        print(f"🧠 Running transcription...  :  {start} seconds")  # DEBUG
+        transcription = transcribe_audio(wav_path)
+        end = datetime.time.time()
+        print("📝 Transcribed text: ", transcription)  # DEBUG
+        print(f"🕒 Transcription duration: {end - start} seconds")
+
+        transcribed_text = transcription.strip()
+        print("✂️ Stripped text:", transcribed_text)  # DEBUG
+
+        print("📐 Comparing transcription with expected word...")  # DEBUG
+        compare_result = compare_tamil_graphemes(expected_word, transcribed_text)
+        print("📊 Comparison result:", compare_result)  # DEBUG
+
+        result = "Correct" if compare_result.get("is_exact") else "Incorrect"
+        print("✅ Final result:", result)  # DEBUG
+
+        return jsonify({
+            "result": result
+        })
+
+    except Exception as e:
+        print("❌ Exception occurred:", str(e))  # DEBUG
+        return jsonify({'error': 'Internal Server Error', 'details': str(e)}), 500
 
 if __name__ == '__main__':
     app.run(port=5000, debug=True)

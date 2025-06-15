@@ -16,15 +16,21 @@ let audioChunks = [];
 
 navigator.mediaDevices.getUserMedia({ audio: true })
   .then(stream => {
+    console.log("✅ Microphone access granted"); // DEBUG
     mediaRecorder = new MediaRecorder(stream);
 
     mediaRecorder.ondataavailable = e => {
+      console.log("🎧 Data available:", e.data); // DEBUG
       audioChunks.push(e.data);
     };
 
     mediaRecorder.onstop = () => {
+      console.log("🛑 Recording stopped"); // DEBUG
+
       const blob = new Blob(audioChunks, { type: 'audio/webm' });
+      console.log("📦 Created audio blob:", blob); // DEBUG
       const audioURL = URL.createObjectURL(blob);
+      console.log("🔗 Audio URL:", audioURL); // DEBUG
 
       const audio = document.createElement('audio');
       audio.controls = true;
@@ -60,7 +66,7 @@ navigator.mediaDevices.getUserMedia({ audio: true })
     });
   })
   .catch(err => {
-    alert('🎤 மைக்ரோஃபோன் அணுகல் தோல்வி');
+    alert('🎤 மைக்ரோஃபோன் அணுகல் தோல்வி '+ err.message);
     console.error(err);
   });
 
@@ -68,6 +74,7 @@ navigator.mediaDevices.getUserMedia({ audio: true })
 const BACKEND_URL = window.BACKEND_URL || 'http://127.0.0.1:5000';  // fallback for local testing
 
 function sendToBackend(blob, expectedWord) {
+  console.log("📤 Sending audio to backend:", expectedWord); // DEBUG
   const formData = new FormData();
   formData.append('audio', blob, 'audio.webm');
 
@@ -75,8 +82,15 @@ function sendToBackend(blob, expectedWord) {
     method: 'POST',
     body: formData
   })
-    .then(response => response.json())
+    .then(response => {
+      console.log("✅ Got response from backend"); // DEBUG
+      if (!response.ok) {
+        throw new Error(`Server error: ${response.status}`);
+      }
+      return response.json(); // ✅ Must return this!
+    })
     .then(data => {
+      console.log("📨 Backend response data:", data); // DEBUG
       const resultText = document.createElement('p');
       resultText.innerHTML = `<strong>முடிவு:</strong> ${data.result}`;
 
@@ -97,6 +111,7 @@ function sendToBackend(blob, expectedWord) {
     })
     .catch(error => {
       console.error('Error sending audio:', error);
+       alert('⚠️ Backend Error: ' + error.message); // Logging to See What’s Failing
     });
 }
 
