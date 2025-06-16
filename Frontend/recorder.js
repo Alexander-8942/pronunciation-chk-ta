@@ -28,7 +28,7 @@ navigator.mediaDevices.getUserMedia({ audio: true })
       console.log("🛑 Recording stopped"); // DEBUG
 
       const blob = new Blob(audioChunks, { type: 'audio/webm' });
-      console.log("📦 Created audio blob:", blob); // DEBUG
+      alconsole.log("📦 Created audio blob:", blob); // DEBUG
       const audioURL = URL.createObjectURL(blob);
       console.log("🔗 Audio URL:", audioURL); // DEBUG
 

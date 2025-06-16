@@ -2,6 +2,7 @@ from transformers import pipeline
 import torch
 
 device = "cuda:0" if torch.cuda.is_available() else "cpu"
+print(f"\n==== device used: ", device," ====\n")
 
 #  Model is loaded ONCE at import time
 print("\nLoading Whisper model...\n")

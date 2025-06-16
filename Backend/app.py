@@ -5,7 +5,7 @@ import os
 from asr_model import transcribe_audio
 from compare import compare_tamil_graphemes
 from utils.base_aud_tools import convert_to_wav
-import datetime
+from datetime import datetime
 
 app = Flask(__name__)
 CORS(app)  # Allow all origins (for testing)
@@ -19,7 +19,7 @@ def check_pronunciation():
         print("🔹 Received request to /check")  # DEBUG
         print("🔹 Files:", request.files)  # DEBUG
         print("🔹 Args:", request.args)  # DEBUG
-        print(f"🔹 Received request at: {datetime.datetime.now()}") #DEBUG
+        print(f"🔹 Received request at: {datetime.now()}") #DEBUG
 
         if 'audio' not in request.files:
             print("❌ No audio file in request")  # DEBUG
@@ -43,12 +43,15 @@ def check_pronunciation():
             print("❌ Audio conversion failed")  # DEBUG
             return jsonify({'error': 'Audio conversion failed'}), 500
 
-        start = datetime.time.time()
-        print(f"🧠 Running transcription...  :  {start} seconds")  # DEBUG
+        start = datetime.now()
+        print(f"🧠 Running transcription...  :  {start}")  # DEBUG
         transcription = transcribe_audio(wav_path)
-        end = datetime.time.time()
-        print("📝 Transcribed text: ", transcription)  # DEBUG
-        print(f"🕒 Transcription duration: {end - start} seconds")
+        end = datetime.now()
+        
+        print(f"📝 Transcribed text: {transcription}   {end}")  # DEBUG
+
+        #print(f"📝 Transcribed text: ", transcription, "  ",{end})  # DEBUG
+        print(f"🕒 Transcription duration: {end - start}")
 
         transcribed_text = transcription.strip()
         print("✂️ Stripped text:", transcribed_text)  # DEBUG
