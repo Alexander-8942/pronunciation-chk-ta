@@ -8,7 +8,7 @@ from utils.base_aud_tools import convert_to_wav
 from datetime import datetime
 
 app = Flask(__name__)
-CORS(app)  # Allow all origins (for testing)
+CORS(app) # Allow all origins (for testing)
 UPLOAD_FOLDER = 'uploads'
 os.makedirs(UPLOAD_FOLDER, exist_ok=True)
 
@@ -65,11 +65,16 @@ def check_pronunciation():
 
         return jsonify({
             "result": result
-        })
+        }), 200
 
     except Exception as e:
         print("❌ Exception occurred:", str(e))  # DEBUG
         return jsonify({'error': 'Internal Server Error', 'details': str(e)}), 500
+
+@app.after_request
+def log_headers(response):
+    print("🔹 Response headers:", response.headers)
+    return response
 
 if __name__ == '__main__':
     app.run(port=5000, debug=True)
