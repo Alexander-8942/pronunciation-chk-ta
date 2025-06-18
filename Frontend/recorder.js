@@ -1,311 +1,341 @@
-// references to DOM elements
+// References to DOM elements
 const recordBtn = document.getElementById('recordBtn');
+const recordLabel = document.getElementById('recordLabel');
 const audioPlayback = document.getElementById('audioPlayback');
+const controlButtons = document.getElementById('controlButtons');
+const rerecordBtn = document.getElementById('rerecordBtn');
+const submitBtn = document.getElementById('submitBtn');
 const promptText = document.getElementById('prompt');
 const progressText = document.getElementById('progress');
+const feedback = document.getElementById('feedback');
 
 const words = [
   "மலர்", "நீர்வீழ்ச்சி", "பருப்பு", "முட்டை", "குறிஞ்சி", "வானம்",
   "மழை", "பசு", "மரம்", "தடாகம்"
 ];
 
-// track current word index
+// Track current word index and app state
 let currentIndex = 0;
-updatePrompt();
-
-let mediaRecorder;
+let mediaRecorder = null;
 let audioChunks = [];
-
-// microphone access and set up
-navigator.mediaDevices.getUserMedia({ audio: true })
-  .then(stream => {
-    console.log("✅ Microphone access granted"); // debug
-    mediaRecorder = new MediaRecorder(stream);
-
-    mediaRecorder.ondataavailable = (e) => {
-      console.log("🎧 Data available:", e.data); // debug
-      audioChunks.push(e.data);
-    };
-
-    // mediaRecorder.onstop = () => {
-    //   console.log("🛑 Recording stopped"); // debug
-
-    //   const blob = new Blob(audioChunks, { type: 'audio/webm' });
-    //   console.log("📦 Created audio blob:", blob); // debug
-
-    //   const audioURL = URL.createObjectURL(blob);
-    //   console.log("🔗 Audio URL:", audioURL); // debug
-
-    //   const audio = document.createElement('audio');
-    //   audio.controls = true;
-    //   audio.src = audioURL;
-
-    //   audioPlayback.innerHTML = '';
-    //   audioPlayback.appendChild(audio);
-
-    //   sendToBackend(blob, words[currentIndex]);
-
-    //   audioChunks = [];
-    // };
-
-    // console.log("starting new recording: before setupRecordingControls function call")
-    // setupRecordingControls(recordBtn);
-  })
-  .catch(err => {
-    alert('🎤 மைக்ரோஃபோன் அணுகல் தோல்வி ' + err.message);
-    console.error(err);
-  });
-
-console.log("starting new recording: first setupRecordingControls function call")
-setupRecordingControls(recordBtn);
-
-function setupRecordingControls(button) {
-  console.log("inside setupRecordingControls function")
-  button.addEventListener('mousedown', (event) => {
-    event.preventDefault();
-    console.log("🔴 Recording started");  // debug
-    audioChunks = [];
-    mediaRecorder.start();
-    console.log("recorder button state: ", mediaRecorder.state) // debug
-  });
-
-  button.addEventListener('mouseup', (event) => {
-    event.preventDefault();
-    if (mediaRecorder.state === 'recording') {
-      mediaRecorder.stop();
-      console.log("recorder button state: ", mediaRecorder.state) //debug
-    }
-
-    mediaRecorder.onstop = () => {
-      console.log("🛑 Recording stopped"); // debug
-
-      const blob = new Blob(audioChunks, { type: 'audio/webm' });
-      console.log("📦 Created audio blob:", blob); // debug
-
-      const audioURL = URL.createObjectURL(blob);
-      console.log("🔗 Audio URL:", audioURL); // debug
-
-      const audio = document.createElement('audio');
-      audio.controls = true;
-      audio.src = audioURL;
-
-      audioPlayback.innerHTML = '';
-      audioPlayback.appendChild(audio);
-
-      sendToBackend(blob, words[currentIndex]);
-
-      audioChunks = [];
-    };
-
-  });
-}
+let isRecording = false;
+let currentAudioBlob = null;
 
 const BACKEND_URL = window.BACKEND_URL || 'http://127.0.0.1:5000';
 
-// function sendToBackend(blob, expectedWord) {// using fetch
-//   console.log("📤 Sending audio to backend:", expectedWord); // debug
-//   const formData = new FormData();
-//   formData.append('audio', blob, 'audio.webm');
+// Initialize the app
+function initializeApp() {
+  updatePrompt();
+  setupMicrophone();
+  setupEventListeners();
+}
 
-//   fetch(`${BACKEND_URL}/check?expected=${encodeURIComponent(expectedWord)}`, {
-//     method: 'POST',
-//     body: formData,
-//     mode: 'cors'
-//   })
-//   //console.log("request sent sucessfully")
-//     .then(response => {
-//       console.log("📥 Received response from backend");  // debug
-//       if (!response.ok) {
-//         throw new Error(`Server error: ${response.status}`);
-//       }
-//       return response.json();
-//     })
-//     .then(data => {
-//       console.log("📨 Backend response data:", data); // debug
-//       const resultText = document.createElement('p');
-//       resultText.innerHTML = `<strong>முடிவு:</strong> ${data.result}`;
-//       audioPlayback.appendChild(resultText);
+// Set up microphone access
+function setupMicrophone() {
+  navigator.mediaDevices.getUserMedia({ audio: true })
+    .then(stream => {
+      console.log("✅ Microphone access granted");
+      
+      // Create MediaRecorder
+      mediaRecorder = new MediaRecorder(stream);
+      
+      // Set up event handlers
+      mediaRecorder.ondataavailable = (e) => {
+        console.log("🎧 Data available:", e.data);
+        audioChunks.push(e.data);
+      };
 
-//       if (data.result === "Correct") {
-//         setTimeout(() => {
-//           currentIndex++;
-//           if (currentIndex < words.length) {
-//             updatePrompt();
-//           } else {
-//             promptText.textContent = "🏁 முடிந்தது!";
-//             progressText.textContent = "All words completed!";
-//             recordBtn.disabled = true;
-//           }
-//         }, 1500);
-//       }
+      mediaRecorder.onstop = () => {
+        console.log("🛑 Recording stopped");
+        handleRecordingStop();
+      };
 
-//       //console.log("starting next recording: after receiving positive response")
-//       //setupRecordingControls(recordBtn);
+      // Enable recording controls
+      setupRecordingControls();
+      recordBtn.disabled = false;
+      recordLabel.textContent = "Press & Hold to Record";
+      
+    })
+    .catch(err => {
+      console.error('Microphone access failed:', err);
+      recordLabel.textContent = 'Microphone access failed';
+      recordBtn.disabled = true;
+      showFeedback('🎤 மைக்ரோஃபோன் அணுகல் தோல்வி: ' + err.message, 'incorrect');
+    });
+}
 
+// Set up all event listeners
+function setupEventListeners() {
+  // Re-record button
+  rerecordBtn.addEventListener('click', () => {
+    startNewRecording();
+  });
 
-//     })
-//     .catch(error => {
-//       console.error('Error sending audio:', error);
-//       alert('⚠️ Backend Error: ' + error.message);
-//     });
-// }
-
-// function sendToBackend2(blob, expectedWord) {// using fetch
-//   console.log("📤 Sending audio to backend:", expectedWord); // Debug
-//   const formData = new FormData();
-//   formData.append('audio', blob, 'audio.webm');
-
-//   try {
-//     console.log("📤 Sending request to:", `${BACKEND_URL}/check?expected=${encodeURIComponent(expectedWord)}`);
-//     console.log("📦 Blob type:", blob.type, "Size:", blob.size / 1024, "KB");
-//     for (let [key, value] of formData.entries()) {
-//       console.log("📤 FormData entry:", key, value);
-//     }
-
-//     fetch(`${BACKEND_URL}/check?expected=${encodeURIComponent(expectedWord)}`, {
-//       method: 'POST',
-//       body: formData
-//     })
-//       .then(response => {
-//         console.log("📥 Response status:", response.status); // Debug
-//         console.log("📥 Response headers:", [...response.headers]); // Debug
-//         if (!response.ok) {
-//           return response.text().then(text => {
-//             console.error("📥 Response text:", text);
-//             throw new Error(`Server error: ${response.status} - ${text}`);
-//           });
-//         }
-//         return response.json();
-//       })
-//       .then(data => {
-//         console.log("📨 Backend response data:", data); // Debug
-//         const resultText = document.createElement('p');
-//         resultText.innerHTML = `<strong>முடிவு:</strong> ${data.result}`;
-//         audioPlayback.appendChild(resultText);
-
-//         if (data.result === "Correct") {
-//           setTimeout(() => {
-//             currentIndex++;
-//             if (currentIndex < words.length) {
-//               updatePrompt();
-//             } else {
-//               promptText.textContent = "🏁 முடிந்தது!";
-//               progressText.textContent = "All words completed!";
-//               recordBtn.disabled = true;
-//             }
-//           }, 1500);
-//         }
-
-//         console.log("Starting next recording: after receiving positive response");
-//         setupRecordingControls(recordBtn);
-//       })
-//       .catch(error => {
-//         console.error("❌ Fetch error:", error.message);
-//         console.error("❌ Error stack:", error.stack);
-//         alert('⚠️ Backend Error: ' + error.message);
-//       });
-//   } catch (error) {
-//     console.error("❌ Error before fetch:", error.message);
-//     console.error("❌ Error stack:", error.stack);
-//     alert('⚠️ Frontend Error: ' + error.message);
-//   }
-// }
-
-function sendToBackend(blob, expectedWord) { // using ajax
-  console.log("📤 Sending audio to backend:", expectedWord); // Debug
-  const formData = new FormData();
-  formData.append('audio', blob, 'audio.webm');
-
-  try {
-    const xhr = new XMLHttpRequest();
-    const url = `${BACKEND_URL}/check?expected=${encodeURIComponent(expectedWord)}`;
-
-    console.log("📤 Sending request to:", url);
-    console.log("📦 Blob type:", blob.type, "Size:", blob.size / 1024, "KB");
-
-    for (let [key, value] of formData.entries()) {
-      console.log("📤 FormData entry:", key, value);
+  // Submit button
+  submitBtn.addEventListener('click', () => {
+    if (currentAudioBlob) {
+      submitRecording();
     }
+  });
+}
 
-    xhr.open('POST', url, true);
+// Set up recording button controls
+function setupRecordingControls() {
+  recordBtn.addEventListener('mousedown', startRecording);
+  recordBtn.addEventListener('mouseup', stopRecording);
+  recordBtn.addEventListener('mouseleave', stopRecording);
+  
+  // Touch events for mobile
+  recordBtn.addEventListener('touchstart', startRecording);
+  recordBtn.addEventListener('touchend', stopRecording);
+}
 
-    xhr.onload = function () {
-      console.log("📥 Response status:", xhr.status);
-
-      if (xhr.status >= 200 && xhr.status < 300) {
-        try {
-          const data = JSON.parse(xhr.responseText);
-          console.log("📨 Backend response data:", data);
-
-          const resultText = document.createElement('p');
-          resultText.innerHTML = `<strong>முடிவு:</strong> ${data.result}`;
-          audioPlayback.appendChild(resultText);
-
-          if (data.result === "Correct") {
-            setTimeout(() => {
-              currentIndex++;
-              if (currentIndex < words.length) {
-                updatePrompt();
-              } else {
-                promptText.textContent = "🏁 முடிந்தது!";
-                progressText.textContent = "All words completed!";
-                recordBtn.disabled = true;
-              }
-            }, 1500);
-          }
-
-          // console.log("Starting next recording: after receiving positive response");
-          // setupRecordingControls(recordBtn);
-
-        } catch (err) {
-          console.error("❌ JSON parse error:", err.message);
-          alert('⚠️ JSON Parse Error: ' + err.message);
-        }
-
-      } else {
-        console.error("❌ Server responded with error:", xhr.status, xhr.responseText);
-        alert('⚠️ Backend Error: ' + xhr.status + ' - ' + xhr.responseText);
-      }
-    };
-
-    xhr.onerror = function () {
-      console.error("❌ AJAX request failed");
-      alert('⚠️ Network Error: Could not reach backend.');
-    };
-
-    xhr.send(formData);
-
+function startRecording(event) {
+  event.preventDefault();
+  
+  if (!mediaRecorder || isRecording || recordBtn.disabled) return;
+  
+  console.log("🔴 Recording started");
+  audioChunks = [];
+  isRecording = true;
+  
+  try {
+    mediaRecorder.start();
+    recordBtn.classList.add('recording');
+    recordLabel.textContent = 'Recording... (Hold & Speak)';
+    
+    // Hide previous results
+    hideControlButtons();
+    clearFeedback();
+    
   } catch (error) {
-    console.error("❌ Error before request:", error.message);
-    console.error("❌ Error stack:", error.stack);
-    alert('⚠️ Frontend Error: ' + error.message);
+    console.error('Failed to start recording:', error);
+    isRecording = false;
+    recordLabel.textContent = 'Recording failed';
   }
 }
 
+function stopRecording(event) {
+  event.preventDefault();
+  
+  if (!mediaRecorder || !isRecording) return;
+  
+  if (mediaRecorder.state === 'recording') {
+    mediaRecorder.stop();
+    isRecording = false;
+    recordBtn.classList.remove('recording');
+    recordLabel.textContent = 'Processing...';
+    
+    console.log("🛑 Stop recording requested");
+  }
+}
 
-// function fetchFromBackend() { // to check request response issue : SSL issue, getting response from this fetch
-//   fetch('https://academy.karky.in:8884/api/game/ilakkanaa?level=1&uid=234')  // Replace with your actual API URL
-//     .then(response => {
-//       if (!response.ok) {
-//         throw new Error(`HTTP error! Status: ${response.status}`);
-//       }
-//       return response.json();  // Parse the JSON response
-//     })
-//     .then(data => {
-//       console.log("📦 JSON Response from backend:", data);
-//       // You can also display it on the page if needed
-//       document.getElementById("output").textContent = JSON.stringify(data, null, 2);
-//     })
-//     .catch(error => {
-//       console.error("❌ Failed to fetch:", error);
-//     });
-// }
-// Call the function when needed, e.g., on page load or button click
-// fetchFromBackend();
+function handleRecordingStop() {
+  if (audioChunks.length === 0) {
+    console.warn("No audio data recorded");
+    recordLabel.textContent = 'No audio recorded. Try again.';
+    return;
+  }
 
+  // Create audio blob
+  currentAudioBlob = new Blob(audioChunks, { type: 'audio/webm' });
+  console.log("📦 Created audio blob:", currentAudioBlob);
 
+  // Display audio playback
+  displayAudioPlayback(currentAudioBlob);
+  
+  // Show control buttons
+  showControlButtons();
+  
+  // Update UI
+  recordLabel.textContent = 'Listen to your recording';
+  
+  // Reset audio chunks
+  audioChunks = [];
+}
+
+function displayAudioPlayback(blob) {
+  const audioURL = URL.createObjectURL(blob);
+  
+  audioPlayback.innerHTML = `
+    <div class="audio-info">
+      <p><strong>Your recording:</strong></p>
+      <audio controls>
+        <source src="${audioURL}" type="audio/webm">
+        Your browser does not support audio playback.
+      </audio>
+    </div>
+  `;
+  
+  audioPlayback.classList.remove('hidden');
+}
+
+function showControlButtons() {
+  controlButtons.style.display = 'flex';
+}
+
+function hideControlButtons() {
+  controlButtons.style.display = 'none';
+}
+
+function startNewRecording() {
+  // Clear current recording
+  currentAudioBlob = null;
+  audioPlayback.innerHTML = '';
+  audioPlayback.classList.add('hidden');
+  hideControlButtons();
+  clearFeedback();
+  
+  // Reset record button
+  recordBtn.disabled = false;
+  recordLabel.textContent = 'Press & Hold to Record';
+}
+
+function submitRecording() {
+  if (!currentAudioBlob) {
+    showFeedback('No recording to submit', 'incorrect');
+    return;
+  }
+  
+  // Disable submit button during processing
+  submitBtn.disabled = true;
+  submitBtn.innerHTML = '<i class="fas fa-spinner fa-spin"></i> Submitting...';
+  
+  // Send to backend
+  sendToBackend(currentAudioBlob, words[currentIndex]);
+}
+
+function sendToBackend(blob, expectedWord) {
+  console.log("📤 Sending audio to backend:", expectedWord);
+  
+  const formData = new FormData();
+  formData.append('audio', blob, 'audio.webm');
+
+  const xhr = new XMLHttpRequest();
+  const url = `${BACKEND_URL}/check?expected=${encodeURIComponent(expectedWord)}`;
+
+  console.log("📤 Sending request to:", url);
+  console.log("📦 Blob type:", blob.type, "Size:", (blob.size / 1024).toFixed(2), "KB");
+
+  // Show processing state
+  showFeedback('பரிசோதிக்கிறது...', '');
+  
+  xhr.open('POST', url, true);
+
+  xhr.onload = function () {
+    console.log("📥 Response status:", xhr.status);
+    
+    // Re-enable submit button
+    submitBtn.disabled = false;
+    submitBtn.innerHTML = '<i class="fas fa-paper-plane"></i> Submit';
+
+    if (xhr.status >= 200 && xhr.status < 300) {
+      try {
+        const data = JSON.parse(xhr.responseText);
+        console.log("📨 Backend response data:", data);
+
+        displayResult(data.result);
+
+        if (data.result === "Correct") {
+          handleCorrectAnswer();
+        } else {
+          // Allow re-recording for incorrect answers
+          setTimeout(() => {
+            startNewRecording();
+          }, 2000);
+        }
+
+      } catch (err) {
+        console.error("❌ JSON parse error:", err.message);
+        showFeedback('Server response error: ' + err.message, 'incorrect');
+      }
+
+    } else {
+      console.error("❌ Server error:", xhr.status, xhr.responseText);
+      showFeedback(`Server Error: ${xhr.status} - ${xhr.responseText}`, 'incorrect');
+    }
+  };
+
+  xhr.onerror = function () {
+    console.error("❌ AJAX request failed");
+    submitBtn.disabled = false;
+    submitBtn.innerHTML = '<i class="fas fa-paper-plane"></i> Submit';
+    showFeedback('Network Error: Could not reach server. Make sure the backend is running.', 'incorrect');
+  };
+
+  xhr.ontimeout = function () {
+    console.error("❌ Request timed out");
+    submitBtn.disabled = false;
+    submitBtn.innerHTML = '<i class="fas fa-paper-plane"></i> Submit';
+    showFeedback('Request timed out. Please try again.', 'incorrect');
+  };
+
+  xhr.timeout = 15000; // 15 second timeout
+
+  try {
+    xhr.send(formData);
+  } catch (error) {
+    console.error("❌ Error sending request:", error.message);
+    submitBtn.disabled = false;
+    submitBtn.innerHTML = '<i class="fas fa-paper-plane"></i> Submit';
+    showFeedback('Frontend Error: ' + error.message, 'incorrect');
+  }
+}
+
+function displayResult(result) {
+  const isCorrect = result === "Correct";
+  const message = isCorrect ? 
+    `✅ சரி! "${words[currentIndex]}" - Perfect pronunciation!` : 
+    `❌ தவறு. "${words[currentIndex]}" - Try again.`;
+  
+  showFeedback(message, isCorrect ? 'correct' : 'incorrect');
+}
+
+function showFeedback(message, type) {
+  feedback.textContent = message;
+  feedback.className = type;
+  
+  if (type) {
+    feedback.style.display = 'block';
+  }
+}
+
+function clearFeedback() {
+  feedback.textContent = '';
+  feedback.className = '';
+  feedback.style.display = 'none';
+}
+
+function handleCorrectAnswer() {
+  // Hide controls
+  hideControlButtons();
+  recordBtn.disabled = true;
+  
+  setTimeout(() => {
+    currentIndex++;
+    if (currentIndex < words.length) {
+      // Move to next word
+      updatePrompt();
+      startNewRecording();
+      clearFeedback();
+    } else {
+      // All words completed
+      promptText.textContent = "🏁 முடிந்தது!";
+      progressText.textContent = "All words completed! வாழ்த்துகள்!";
+      recordLabel.textContent = 'Completed!';
+      showFeedback('🎉 Congratulations! You completed all words!', 'correct');
+    }
+  }, 2500);
+}
 
 function updatePrompt() {
   promptText.textContent = words[currentIndex];
   progressText.textContent = `சொல் ${currentIndex + 1} / ${words.length}`;
+}
+
+// Initialize the app when DOM is loaded
+if (document.readyState === 'loading') {
+  document.addEventListener('DOMContentLoaded', initializeApp);
+} else {
+  initializeApp();
 }
