@@ -13,7 +13,7 @@ UPLOAD_FOLDER = 'uploads'
 os.makedirs(UPLOAD_FOLDER, exist_ok=True)
 
 
-@app.route('/check', methods=['POST'])
+@app.route('/check', methods=['POST', 'OPTIONS'])
 def check_pronunciation():
     try:
         print("🔹 Received request to /check")  # DEBUG

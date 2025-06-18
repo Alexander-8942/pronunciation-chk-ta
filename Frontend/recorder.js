@@ -102,113 +102,114 @@ function setupRecordingControls(button) {
 
 const BACKEND_URL = window.BACKEND_URL || 'http://127.0.0.1:5000';
 
-function sendToBackend1(blob, expectedWord) {// using fetch
-  console.log("📤 Sending audio to backend:", expectedWord); // debug
-  const formData = new FormData();
-  formData.append('audio', blob, 'audio.webm');
+// function sendToBackend(blob, expectedWord) {// using fetch
+//   console.log("📤 Sending audio to backend:", expectedWord); // debug
+//   const formData = new FormData();
+//   formData.append('audio', blob, 'audio.webm');
 
-  fetch(`${BACKEND_URL}/check?expected=${encodeURIComponent(expectedWord)}`, {
-    method: 'POST',
-    body: formData
-  })
-  //console.log("request sent sucessfully")
-    .then(response => {
-      console.log("📥 Received response from backend");  // debug
-      if (!response.ok) {
-        throw new Error(`Server error: ${response.status}`);
-      }
-      return response.json();
-    })
-    .then(data => {
-      console.log("📨 Backend response data:", data); // debug
-      const resultText = document.createElement('p');
-      resultText.innerHTML = `<strong>முடிவு:</strong> ${data.result}`;
-      audioPlayback.appendChild(resultText);
+//   fetch(`${BACKEND_URL}/check?expected=${encodeURIComponent(expectedWord)}`, {
+//     method: 'POST',
+//     body: formData,
+//     mode: 'cors'
+//   })
+//   //console.log("request sent sucessfully")
+//     .then(response => {
+//       console.log("📥 Received response from backend");  // debug
+//       if (!response.ok) {
+//         throw new Error(`Server error: ${response.status}`);
+//       }
+//       return response.json();
+//     })
+//     .then(data => {
+//       console.log("📨 Backend response data:", data); // debug
+//       const resultText = document.createElement('p');
+//       resultText.innerHTML = `<strong>முடிவு:</strong> ${data.result}`;
+//       audioPlayback.appendChild(resultText);
 
-      if (data.result === "Correct") {
-        setTimeout(() => {
-          currentIndex++;
-          if (currentIndex < words.length) {
-            updatePrompt();
-          } else {
-            promptText.textContent = "🏁 முடிந்தது!";
-            progressText.textContent = "All words completed!";
-            recordBtn.disabled = true;
-          }
-        }, 1500);
-      }
+//       if (data.result === "Correct") {
+//         setTimeout(() => {
+//           currentIndex++;
+//           if (currentIndex < words.length) {
+//             updatePrompt();
+//           } else {
+//             promptText.textContent = "🏁 முடிந்தது!";
+//             progressText.textContent = "All words completed!";
+//             recordBtn.disabled = true;
+//           }
+//         }, 1500);
+//       }
 
-      console.log("starting next recording: after receiving positive response")
-      setupRecordingControls(recordBtn);
+//       //console.log("starting next recording: after receiving positive response")
+//       //setupRecordingControls(recordBtn);
 
 
-    })
-    .catch(error => {
-      console.error('Error sending audio:', error);
-      alert('⚠️ Backend Error: ' + error.message);
-    });
-}
+//     })
+//     .catch(error => {
+//       console.error('Error sending audio:', error);
+//       alert('⚠️ Backend Error: ' + error.message);
+//     });
+// }
 
-function sendToBackend2(blob, expectedWord) {// using fetch
-  console.log("📤 Sending audio to backend:", expectedWord); // Debug
-  const formData = new FormData();
-  formData.append('audio', blob, 'audio.webm');
+// function sendToBackend2(blob, expectedWord) {// using fetch
+//   console.log("📤 Sending audio to backend:", expectedWord); // Debug
+//   const formData = new FormData();
+//   formData.append('audio', blob, 'audio.webm');
 
-  try {
-    console.log("📤 Sending request to:", `${BACKEND_URL}/check?expected=${encodeURIComponent(expectedWord)}`);
-    console.log("📦 Blob type:", blob.type, "Size:", blob.size / 1024, "KB");
-    for (let [key, value] of formData.entries()) {
-      console.log("📤 FormData entry:", key, value);
-    }
+//   try {
+//     console.log("📤 Sending request to:", `${BACKEND_URL}/check?expected=${encodeURIComponent(expectedWord)}`);
+//     console.log("📦 Blob type:", blob.type, "Size:", blob.size / 1024, "KB");
+//     for (let [key, value] of formData.entries()) {
+//       console.log("📤 FormData entry:", key, value);
+//     }
 
-    fetch(`${BACKEND_URL}/check?expected=${encodeURIComponent(expectedWord)}`, {
-      method: 'POST',
-      body: formData
-    })
-      .then(response => {
-        console.log("📥 Response status:", response.status); // Debug
-        console.log("📥 Response headers:", [...response.headers]); // Debug
-        if (!response.ok) {
-          return response.text().then(text => {
-            console.error("📥 Response text:", text);
-            throw new Error(`Server error: ${response.status} - ${text}`);
-          });
-        }
-        return response.json();
-      })
-      .then(data => {
-        console.log("📨 Backend response data:", data); // Debug
-        const resultText = document.createElement('p');
-        resultText.innerHTML = `<strong>முடிவு:</strong> ${data.result}`;
-        audioPlayback.appendChild(resultText);
+//     fetch(`${BACKEND_URL}/check?expected=${encodeURIComponent(expectedWord)}`, {
+//       method: 'POST',
+//       body: formData
+//     })
+//       .then(response => {
+//         console.log("📥 Response status:", response.status); // Debug
+//         console.log("📥 Response headers:", [...response.headers]); // Debug
+//         if (!response.ok) {
+//           return response.text().then(text => {
+//             console.error("📥 Response text:", text);
+//             throw new Error(`Server error: ${response.status} - ${text}`);
+//           });
+//         }
+//         return response.json();
+//       })
+//       .then(data => {
+//         console.log("📨 Backend response data:", data); // Debug
+//         const resultText = document.createElement('p');
+//         resultText.innerHTML = `<strong>முடிவு:</strong> ${data.result}`;
+//         audioPlayback.appendChild(resultText);
 
-        if (data.result === "Correct") {
-          setTimeout(() => {
-            currentIndex++;
-            if (currentIndex < words.length) {
-              updatePrompt();
-            } else {
-              promptText.textContent = "🏁 முடிந்தது!";
-              progressText.textContent = "All words completed!";
-              recordBtn.disabled = true;
-            }
-          }, 1500);
-        }
+//         if (data.result === "Correct") {
+//           setTimeout(() => {
+//             currentIndex++;
+//             if (currentIndex < words.length) {
+//               updatePrompt();
+//             } else {
+//               promptText.textContent = "🏁 முடிந்தது!";
+//               progressText.textContent = "All words completed!";
+//               recordBtn.disabled = true;
+//             }
+//           }, 1500);
+//         }
 
-        console.log("Starting next recording: after receiving positive response");
-        setupRecordingControls(recordBtn);
-      })
-      .catch(error => {
-        console.error("❌ Fetch error:", error.message);
-        console.error("❌ Error stack:", error.stack);
-        alert('⚠️ Backend Error: ' + error.message);
-      });
-  } catch (error) {
-    console.error("❌ Error before fetch:", error.message);
-    console.error("❌ Error stack:", error.stack);
-    alert('⚠️ Frontend Error: ' + error.message);
-  }
-}
+//         console.log("Starting next recording: after receiving positive response");
+//         setupRecordingControls(recordBtn);
+//       })
+//       .catch(error => {
+//         console.error("❌ Fetch error:", error.message);
+//         console.error("❌ Error stack:", error.stack);
+//         alert('⚠️ Backend Error: ' + error.message);
+//       });
+//   } catch (error) {
+//     console.error("❌ Error before fetch:", error.message);
+//     console.error("❌ Error stack:", error.stack);
+//     alert('⚠️ Frontend Error: ' + error.message);
+//   }
+// }
 
 function sendToBackend(blob, expectedWord) { // using ajax
   console.log("📤 Sending audio to backend:", expectedWord); // Debug
@@ -280,6 +281,28 @@ function sendToBackend(blob, expectedWord) { // using ajax
     alert('⚠️ Frontend Error: ' + error.message);
   }
 }
+
+
+// function fetchFromBackend() { // to check request response issue : SSL issue, getting response from this fetch
+//   fetch('https://academy.karky.in:8884/api/game/ilakkanaa?level=1&uid=234')  // Replace with your actual API URL
+//     .then(response => {
+//       if (!response.ok) {
+//         throw new Error(`HTTP error! Status: ${response.status}`);
+//       }
+//       return response.json();  // Parse the JSON response
+//     })
+//     .then(data => {
+//       console.log("📦 JSON Response from backend:", data);
+//       // You can also display it on the page if needed
+//       document.getElementById("output").textContent = JSON.stringify(data, null, 2);
+//     })
+//     .catch(error => {
+//       console.error("❌ Failed to fetch:", error);
+//     });
+// }
+// Call the function when needed, e.g., on page load or button click
+// fetchFromBackend();
+
 
 
 function updatePrompt() {
