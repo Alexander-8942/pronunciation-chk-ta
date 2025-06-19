@@ -77,4 +77,12 @@ def log_headers(response):
     return response
 
 if __name__ == '__main__':
-    app.run(port=5000, debug=True)
+    app.run(
+        host='localhost',
+        port=5000, 
+        debug=True
+        , ssl_context=(
+            '/home/karefo/localhost-ssl/localhost.crt',
+            '/home/karefo/localhost-ssl/localhost.key'
+        ) # self-signed ssl cert
+        )

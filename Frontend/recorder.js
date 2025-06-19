@@ -21,7 +21,7 @@ let audioChunks = [];
 let isRecording = false;
 let currentAudioBlob = null;
 
-const BACKEND_URL = window.BACKEND_URL || 'http://127.0.0.1:5000';
+const BACKEND_URL = window.BACKEND_URL || 'https://127.0.0.1:5000';
 
 // Initialize the app
 function initializeApp() {
@@ -73,6 +73,8 @@ function setupEventListeners() {
 
   // Submit button
   submitBtn.addEventListener('click', () => {
+    console.log(submitBtn.closest('form'));
+
     if (currentAudioBlob) {
       submitRecording();
     }
@@ -261,6 +263,7 @@ function sendToBackend(blob, expectedWord) {
     submitBtn.disabled = false;
     submitBtn.innerHTML = '<i class="fas fa-paper-plane"></i> Submit';
     showFeedback('Network Error: Could not reach server. Make sure the backend is running.', 'incorrect');
+    alert("AJAX failed: " + JSON.stringify(event)); // Quick popup diagnostic
   };
 
   xhr.ontimeout = function () {
@@ -276,6 +279,7 @@ function sendToBackend(blob, expectedWord) {
     xhr.send(formData);
   } catch (error) {
     console.error("❌ Error sending request:", error.message);
+    alert("XHR Exception: " + error.message);  // This might catch SSL or CORS issues
     submitBtn.disabled = false;
     submitBtn.innerHTML = '<i class="fas fa-paper-plane"></i> Submit';
     showFeedback('Frontend Error: ' + error.message, 'incorrect');
