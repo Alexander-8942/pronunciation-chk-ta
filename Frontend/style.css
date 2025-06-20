@@ -1,239 +1,134 @@
 body {
-  font-family: 'Segoe UI', sans-serif;
-  background: #f0f4f8;
-  color: #333;
-  text-align: center;
+  font-family: "Helvetica Neue", sans-serif;
+  background: linear-gradient(to right, #f9fafb, #e0f2f1);
   margin: 0;
   padding: 0;
-}
-
-.container {
-  max-width: 500px;
-  margin: 80px auto;
-  background: white;
-  padding: 30px;
-  border-radius: 16px;
-  box-shadow: 0 8px 20px rgba(0, 0, 0, 0.1);
-}
-
-.word-box {
-  margin-bottom: 30px;
-}
-
-#prompt {
-  font-size: 32px;
-  margin-bottom: 10px;
-  color: #444;
-}
-
-#progress {
-  color: #777;
-  font-size: 16px;
-}
-
-.record-container {
   display: flex;
-  flex-direction: column;
+  justify-content: center;
   align-items: center;
-  gap: 10px;
+  min-height: 100vh;
+}
+
+.app-container {
+  max-width: 480px;
+  width: 90%;
+  text-align: center;
+}
+
+h1 {
+  color: #333;
   margin-bottom: 20px;
 }
 
-#recordBtn {
-  width: 80px;
-  height: 80px;
-  border-radius: 50%;
-  background-color: #e53935;
-  color: white;
-  font-size: 28px;
-  border: none;
-  box-shadow: 0 4px 10px rgba(229, 57, 53, 0.4);
-  transition: all 0.3s ease;
-  cursor: pointer;
-  display: flex;
-  align-items: center;
-  justify-content: center;
+.card {
+  background-color: #ffffff;
+  border-radius: 16px;
+  padding: 24px;
+  box-shadow: 0 10px 25px rgba(0, 0, 0, 0.1);
 }
 
-#recordBtn:hover:not(:disabled) {
-  background-color: #c62828;
-  box-shadow: 0 6px 14px rgba(198, 40, 40, 0.5);
-}
-
-#recordBtn:active:not(:disabled) {
-  transform: scale(0.95);
-  background-color: #b71c1c;
-}
-
-#recordBtn:disabled {
-  background-color: #ccc;
-  cursor: not-allowed;
-  box-shadow: 0 2px 5px rgba(0, 0, 0, 0.2);
-}
-
-/* Recording state */
-#recordBtn.recording {
-  background-color: #ff1744;
-  animation: pulse 1s infinite;
-}
-
-@keyframes pulse {
-  0% { transform: scale(1); }
-  50% { transform: scale(1.05); }
-  100% { transform: scale(1); }
-}
-
-.record-label {
-  font-size: 14px;
-  color: #666;
-  font-weight: 500;
-  user-select: none;
-}
-
-/* Audio playback section */
-.audio-playback {
-  margin: 20px 0;
-  padding: 15px;
-  background: #f8f9fa;
-  border-radius: 8px;
-  border-left: 4px solid #e53935;
-}
-
-.audio-playback audio {
-  width: 100%;
+.prompt-box h2 {
+  font-size: 1.5rem;
+  color: #00796b;
   margin-bottom: 10px;
 }
 
-.audio-playback.hidden {
-  display: none;
-}
-
-/* Control buttons */
-.control-buttons {
-  display: flex;
-  gap: 15px;
-  justify-content: center;
+.record-section {
   margin: 20px 0;
 }
 
-.control-btn {
-  padding: 12px 20px;
+.record-btn {
+  background-color: #b3444a;
   border: none;
-  border-radius: 8px;
-  font-size: 14px;
-  font-weight: 500;
-  cursor: pointer;
-  transition: all 0.3s ease;
-  display: flex;
-  align-items: center;
-  gap: 6px;
-}
-
-.rerecord-btn {
-  background-color: #ff9800;
+  border-radius: 50%;
+  width: 70px;
+  height: 70px;
   color: white;
-  box-shadow: 0 3px 8px rgba(255, 152, 0, 0.3);
+  font-size: 24px;
+  cursor: pointer;
+  transition: background-color 0.3s ease;
 }
 
-.rerecord-btn:hover {
-  background-color: #f57c00;
-  box-shadow: 0 4px 12px rgba(245, 124, 0, 0.4);
+.record-btn:hover {
+  background-color: #f10404;
+}
+
+.hint-text {
+  margin-top: 8px;
+  font-size: 0.9rem;
+  color: #666;
+}
+
+.audio-player {
+  width: 100%;
+  margin-top: 10px;
 }
 
 .submit-btn {
-  background-color: #4caf50;
+  margin-top: 16px;
+  background-color: #0288d1;
   color: white;
-  box-shadow: 0 3px 8px rgba(76, 175, 80, 0.3);
+  padding: 10px 16px;
+  font-size: 1rem;
+  border: none;
+  border-radius: 8px;
+  cursor: pointer;
+  transition: background-color 0.3s ease;
 }
 
 .submit-btn:hover {
-  background-color: #45a049;
-  box-shadow: 0 4px 12px rgba(69, 160, 73, 0.4);
+  background-color: #01579b;
 }
 
-.submit-btn:disabled {
-  background-color: #ccc;
-  cursor: not-allowed;
-  box-shadow: none;
+.response-box {
+  margin-top: 20px;
+  padding: 12px 16px;
+  border-radius: 10px;
+  font-size: 1.1rem;
+  font-weight: 600;
+  text-align: center;
+  display: none;
+  transition: all 0.3s ease;
 }
 
-.control-btn:active {
-  transform: scale(0.95);
+.response-box.correct {
+  background-color: #e0f7fa;
+  color: #00695c;
+  border: 2px solid #26a69a;
 }
 
-/* Feedback section */
-#feedback {
-  margin-top: 15px;
-  font-size: 20px;
-  font-weight: bold;
-  padding: 10px;
-  border-radius: 8px;
-}
-
-#feedback.correct {
-  color: #4caf50;
-  background-color: #e8f5e8;
-  border: 1px solid #4caf50;
-}
-
-#feedback.incorrect {
-  color: #f44336;
+.response-box.incorrect {
   background-color: #ffebee;
-  border: 1px solid #f44336;
+  color: #b71c1c;
+  border: 2px solid #ef5350;
 }
 
-/* Loading states */
-.loading {
-  opacity: 0.6;
-  pointer-events: none;
+.response-box.loading {
+  background-color: #e3f2fd;
+  color: #1565c0;
+  border: 2px solid #42a5f5;
 }
 
-/* Processing indicator */
-.processing {
-  position: relative;
+@keyframes pulsePrompt {
+  0%   { background-color: #fffbcc; transform: scale(1.02); }
+  50%  { background-color: #ffffff; transform: scale(1); }
+  100% { background-color: transparent; }
+}
+
+.prompt-highlight {
+  animation: pulsePrompt 0.6s ease;
+}
+
+.progress-bar {
+  height: 10px;
+  background: #ddd;
+  border-radius: 5px;
   overflow: hidden;
+  margin: 10px 0;
 }
-
-.processing::after {
-  content: '';
-  position: absolute;
-  top: 0;
-  left: -100%;
-  width: 100%;
+.progress-fill {
   height: 100%;
-  background: linear-gradient(90deg, transparent, rgba(255,255,255,0.3), transparent);
-  animation: loading 1.5s infinite;
-}
-
-@keyframes loading {
-  0% { left: -100%; }
-  100% { left: 100%; }
-}
-
-/* Mobile responsiveness */
-@media (max-width: 600px) {
-  .container {
-    margin: 20px;
-    padding: 20px;
-  }
-  
-  #prompt {
-    font-size: 28px;
-  }
-  
-  #recordBtn {
-    width: 70px;
-    height: 70px;
-    font-size: 24px;
-  }
-  
-  .control-buttons {
-    flex-direction: column;
-    align-items: center;
-  }
-  
-  .control-btn {
-    width: 200px;
-    justify-content: center;
-  }
+  background: #31b625;
+  width: 0%;
+  transition: width 0.4s ease;
 }

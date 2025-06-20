@@ -1,46 +1,42 @@
 <!DOCTYPE html>
-<html lang="en">
+<html lang="ta">
 <head>
-  <meta charset="UTF-8">
-  <meta name="viewport" content="width=device-width, initial-scale=1.0">
-  <title>Pronunciation Practice</title>
-  <link rel="stylesheet" href="style.css">
-  <link rel="stylesheet" href="https://cdnjs.cloudflare.com/ajax/libs/font-awesome/6.4.0/css/all.min.css">
+  <meta charset="UTF-8" />
+  <meta name="viewport" content="width=device-width, initial-scale=1.0"/>
+  <title>தமிழ் உச்சரிப்பு பயிற்சி</title>
+  <link rel="stylesheet" href="style.css"/>
+  <link rel="stylesheet" href="https://cdnjs.cloudflare.com/ajax/libs/font-awesome/6.4.0/css/all.min.css"/>
 </head>
 <body>
-  <div class="container">
-    <h1>🎤 Tamil Pronunciation Practice</h1>
-    
-    <div class="word-box">
-      <h2 id="prompt">Loading...</h2>
-      <p id="progress">Initializing...</p>
-    </div>
+  <div class="app-container">
+    <h1>🎤 தமிழ் உச்சரிப்பு பயிற்சி</h1>
 
-    <div class="record-container">
-      <button id="recordBtn" type="button" disabled>
-        <i class="fas fa-microphone"></i>
-      </button>
-      <span class="record-label" id="recordLabel">Initializing...</span>
-    </div>
+    <div class="card">
+      <div class="prompt-box">
+        <h2 id="prompt">Loading...</h2>
+      </div>
 
-    <!-- Audio playback section -->
-    <div id="audioPlayback" class="audio-playback"></div>
+      <div class="record-section">
+        <button id="startBtn" class="record-btn">
+          <i class="fas fa-microphone"></i> 
+        </button>
+        <p class="hint-text">Hold to Record</p>
+      </div>
 
-    <!-- Control buttons section -->
-    <div class="control-buttons" id="controlButtons" style="display: none;">
-      <button id="rerecordBtn" type="button" class="control-btn rerecord-btn">
-        <i class="fas fa-redo"></i> Re-record
-      </button>
-      <button id="submitBtn" type="button" class="control-btn submit-btn">
+      <audio id="audioPlayback" controls class="audio-player"></audio>
+
+      <button id="sendBtn" class="submit-btn" disabled>
         <i class="fas fa-paper-plane"></i> Submit
       </button>
-    </div>
 
-    <div id="feedback"></div>
+      <div class="progress-bar">
+        <div class="progress-fill" id="progressFill"></div>
+      </div>
+
+      <div id="apiResponse" class="response-box"></div>
+    </div>
   </div>
 
-  <!-- Load environment variables first -->
-  <script src="env.js"></script>
   <script src="recorder.js"></script>
 </body>
 </html>
